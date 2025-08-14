@@ -21,6 +21,9 @@ import (
 	"sync"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -78,6 +81,12 @@ func (r *VMAgentReconciler) Init(rclient client.Client, l logr.Logger, sc *runti
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=*
 // +kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=*
 func (r *VMAgentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "VMAgentReconciler", trace.WithAttributes(
+		attribute.String("request", req.String()),
+	))
+	defer span.End()
+
 	l := r.Log.WithValues("vmagent", req.Name, "namespace", req.Namespace)
 	ctx = logger.AddToContext(ctx, l)
 	instance := &vmv1beta1.VMAgent{}

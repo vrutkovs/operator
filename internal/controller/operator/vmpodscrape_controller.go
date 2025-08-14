@@ -21,6 +21,9 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -57,6 +60,13 @@ func (r *VMPodScrapeReconciler) Scheme() *runtime.Scheme {
 // +kubebuilder:rbac:groups=operator.victoriametrics.com,resources=vmpodscrapes/status,verbs=get;update;patch
 func (r *VMPodScrapeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	instance := &vmv1beta1.VMPodScrape{}
+
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "VMPodScrapeReconciler", trace.WithAttributes(
+		attribute.String("request", req.String()),
+	))
+	defer span.End()
+
 	l := r.Log.WithValues("vmpodscrape", req.Name, "namespace", req.Namespace)
 	ctx = logger.AddToContext(ctx, l)
 

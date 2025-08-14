@@ -21,6 +21,9 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -59,6 +62,12 @@ func (r *VMAuthReconciler) Scheme() *runtime.Scheme {
 // +kubebuilder:rbac:groups=operator.victoriametrics.com,resources=vmauths,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=operator.victoriametrics.com,resources=vmauths/status,verbs=get;update;patch
 func (r *VMAuthReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	tracer := otel.GetTracerProvider().Tracer("vmauth")
+	ctx, span := tracer.Start(ctx, "VMAuthReconciler", trace.WithAttributes(
+		attribute.String("request", req.String()),
+	))
+	defer span.End()
+
 	l := r.Log.WithValues("vmauth", req.Name, "namespace", req.Namespace)
 	ctx = logger.AddToContext(ctx, l)
 	instance := &vmv1beta1.VMAuth{}

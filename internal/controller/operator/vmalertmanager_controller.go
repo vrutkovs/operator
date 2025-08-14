@@ -20,6 +20,9 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,6 +65,12 @@ func (r *VMAlertmanagerReconciler) Scheme() *runtime.Scheme {
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=*
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=*
 func (r *VMAlertmanagerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "VMAlertmanagerReconciler", trace.WithAttributes(
+		attribute.String("request", req.String()),
+	))
+	defer span.End()
+
 	l := r.Log.WithValues("vmalertmanager", req.Name, "namespace", req.Namespace)
 	ctx = logger.AddToContext(ctx, l)
 	instance := &vmv1beta1.VMAlertmanager{}

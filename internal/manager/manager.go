@@ -20,6 +20,9 @@ import (
 	promv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap/zapcore"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -183,6 +186,19 @@ func RunManager(ctx context.Context) error {
 	// uniform and structured logs.
 	klog.SetLogger(l)
 	ctrl.SetLogger(l)
+
+	tracingEndpoint := os.Getenv("TRACING_ENDPOINT")
+	traceExporter, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpointURL(tracingEndpoint),
+	)
+	if err != nil {
+		return err
+	}
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(traceExporter,
+			trace.WithBatchTimeout(time.Second)),
+	)
+	otel.SetTracerProvider(tp)
 
 	metricServerTLSOpts, err := getMetricsServerMTLSOpts()
 	if err != nil {

@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,6 +47,12 @@ func (r *VMClusterReconciler) Scheme() *runtime.Scheme {
 // +kubebuilder:rbac:groups=operator.victoriametrics.com,resources=vmclusters/finalizers,verbs=*
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=*
 func (r *VMClusterReconciler) Reconcile(ctx context.Context, request ctrl.Request) (result ctrl.Result, err error) {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "VMClusterReconciler", trace.WithAttributes(
+		attribute.String("request", request.String()),
+	))
+	defer span.End()
+
 	l := r.Log.WithValues("vmcluster", request.Name, "namespace", request.Namespace)
 	ctx = logger.AddToContext(ctx, l)
 	instance := &vmv1beta1.VMCluster{}
