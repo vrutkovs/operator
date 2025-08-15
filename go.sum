@@ -318,8 +318,8 @@ github.com/valyala/quicktemplate v1.8.0 h1:zU0tjbIqTRgKQzFY1L42zq0qR3eh4WoQQdIdq
 github.com/valyala/quicktemplate v1.8.0/go.mod h1:qIqW8/igXt8fdrUln5kOSb+KWMaJ4Y8QUsfd1k6L2jM=
 github.com/vrutkovs/client-go v0.0.0-20250813180915-be10fef35824 h1:4pxHLFUVZ7KD+E7tLYOX29zmgMPUBHpyGQnZWWkDizk=
 github.com/vrutkovs/client-go v0.0.0-20250813180915-be10fef35824/go.mod h1:DG7x7QdXiFcdomhcMKUHLTqViZMBsVuYplNwZUVIBF0=
-github.com/vrutkovs/controller-runtime v0.0.0-20250814164353-f861ebad3ed1 h1:YGCVZI65IOwVYNvnzS9qyKTtA29IX30Xxz3JEQGTg90=
-github.com/vrutkovs/controller-runtime v0.0.0-20250814164353-f861ebad3ed1/go.mod h1:mwlaJ+BmYR5CqUr9+jKsFA1GzvuHotjspGsfMZFjNeg=
+github.com/vrutkovs/controller-runtime v0.0.0-20250815082921-608104df4f89 h1:Fw0GdQOWiMEQ9VB9fRstF5sym9gmDAWXftA24P7twj4=
+github.com/vrutkovs/controller-runtime v0.0.0-20250815082921-608104df4f89/go.mod h1:mwlaJ+BmYR5CqUr9+jKsFA1GzvuHotjspGsfMZFjNeg=
 github.com/vrutkovs/klog/v2 v2.0.0-20250813113851-0481beef9e99 h1:DOlfHpFD+qKT2bW5iDFuaob32qKll+sF1Ilrm3S0E5w=
 github.com/vrutkovs/klog/v2 v2.0.0-20250813113851-0481beef9e99/go.mod h1:0kkXxJ4w2yULlxeaf+U7pOCUCTlW+0iI+bvDZQ4zPI4=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=

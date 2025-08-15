@@ -119,5 +119,5 @@ replace github.com/VictoriaMetrics/operator/api => ./api
 replace (
 	k8s.io/client-go => github.com/vrutkovs/client-go v0.0.0-20250813180915-be10fef35824
 	k8s.io/klog/v2 => github.com/vrutkovs/klog/v2 v2.0.0-20250813113851-0481beef9e99
-	sigs.k8s.io/controller-runtime => github.com/vrutkovs/controller-runtime v0.0.0-20250814164353-f861ebad3ed1
+	sigs.k8s.io/controller-runtime => github.com/vrutkovs/controller-runtime v0.0.0-20250815082921-608104df4f89
 )
