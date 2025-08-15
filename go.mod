@@ -117,8 +117,8 @@ require (
 replace github.com/VictoriaMetrics/operator/api => ./api
 
 replace (
-	github.com/go-logr/logr => github.com/vrutkovs/logr v0.0.0-20250815091312-03a9dcbc78e7
-	k8s.io/client-go => github.com/vrutkovs/client-go v0.0.0-20250813180915-be10fef35824
+	github.com/go-logr/logr => github.com/vrutkovs/logr v0.0.0-20250815095452-12c959b82c41
+	k8s.io/client-go => github.com/vrutkovs/client-go v0.0.0-20250815101942-9e7b71714c53
 	k8s.io/klog/v2 => github.com/vrutkovs/klog/v2 v2.0.0-20250813113851-0481beef9e99
-	sigs.k8s.io/controller-runtime => github.com/vrutkovs/controller-runtime v0.0.0-20250815091424-c1c5270db5a5
+	sigs.k8s.io/controller-runtime => github.com/vrutkovs/controller-runtime v0.0.0-20250815095537-c745a765361e
 )

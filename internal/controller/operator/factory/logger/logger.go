@@ -73,7 +73,7 @@ func (lw *Logger) WithName(name string) logr.LogSink {
 func WithContext(ctx context.Context) logr.Logger {
 	v, ok := ctx.Value(contextKey).(logr.Logger)
 	if ok {
-		return v
+		return v.WithContext(ctx)
 	}
 	return globalLogger
 }
