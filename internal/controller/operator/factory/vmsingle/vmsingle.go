@@ -6,6 +6,7 @@ import (
 	"path"
 	"sort"
 
+	"go.opentelemetry.io/otel"
 	"gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -60,6 +61,9 @@ func makePvc(cr *vmv1beta1.VMSingle) *corev1.PersistentVolumeClaim {
 
 // CreateOrUpdate performs an update for single node resource
 func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMSingle, rclient client.Client) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "vmsingle.CreateOrUpdate")
+	defer span.End()
 
 	var prevCR *vmv1beta1.VMSingle
 	if cr.ParsedLastAppliedSpec != nil {
@@ -114,6 +118,9 @@ func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMSingle, rclient client.
 }
 
 func newDeploy(ctx context.Context, cr *vmv1beta1.VMSingle) (*appsv1.Deployment, error) {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "vmsingle.newDeploy")
+	defer span.End()
 
 	podSpec, err := makeSpec(ctx, cr)
 	if err != nil {
@@ -317,6 +324,9 @@ func makeSpec(ctx context.Context, cr *vmv1beta1.VMSingle) (*corev1.PodTemplateS
 }
 
 func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMSingle) (*corev1.Service, error) {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "vmsingle.createOrUpdateService")
+	defer span.End()
 
 	addExtraPorts := func(svc *corev1.Service, vmb *vmv1beta1.VMBackup) {
 		if cr.Spec.Port != "8428" {
@@ -402,6 +412,10 @@ func buildStreamAggrConfig(ctx context.Context, cr *vmv1beta1.VMSingle, rclient 
 
 // createOrUpdateStreamAggrConfig builds stream aggregation configs for vmsingle at separate configmap, serialized as yaml
 func createOrUpdateStreamAggrConfig(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMSingle) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "vmsingle.createOrUpdateStreamAggrConfig")
+	defer span.End()
+
 	if !cr.HasAnyStreamAggrRule() {
 		return nil
 	}
@@ -417,6 +431,10 @@ func createOrUpdateStreamAggrConfig(ctx context.Context, rclient client.Client, 
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMSingle) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "vmsingle.deletePrevStateResources")
+	defer span.End()
+
 	if prevCR == nil {
 		return nil
 	}

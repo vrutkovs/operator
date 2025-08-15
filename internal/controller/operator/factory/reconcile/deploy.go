@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"go.opentelemetry.io/otel"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -22,6 +23,9 @@ import (
 
 // Deployment performs an update or create operator for deployment and waits until it's replicas is ready
 func Deployment(ctx context.Context, rclient client.Client, newDeploy, prevDeploy *appsv1.Deployment, hasHPA bool) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "reconcile.Deployment")
+	defer span.End()
 
 	var isPrevEqual bool
 	var prevSpecDiff string
@@ -34,6 +38,9 @@ func Deployment(ctx context.Context, rclient client.Client, newDeploy, prevDeplo
 	rclient.Scheme().Default(newDeploy)
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		ctx, span := tracer.Start(ctx, "reconcile.Deployment.func")
+		defer span.End()
+
 		var currentDeploy appsv1.Deployment
 		err := rclient.Get(ctx, types.NamespacedName{Name: newDeploy.Name, Namespace: newDeploy.Namespace}, &currentDeploy)
 		if err != nil {
@@ -94,6 +101,10 @@ func Deployment(ctx context.Context, rclient client.Client, newDeploy, prevDeplo
 
 // waitDeploymentReady waits until deployment's replicaSet rollouts and all new pods is ready
 func waitDeploymentReady(ctx context.Context, rclient client.Client, dep *appsv1.Deployment, deadline time.Duration) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "reconcile.waitDeploymentReady")
+	defer span.End()
+
 	var isErrDealine bool
 	err := wait.PollUntilContextTimeout(ctx, time.Second, deadline, false, func(ctx context.Context) (done bool, err error) {
 		var actualDeploy appsv1.Deployment

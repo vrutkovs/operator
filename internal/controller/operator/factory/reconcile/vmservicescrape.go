@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"go.opentelemetry.io/otel"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -17,7 +18,14 @@ import (
 
 // VMServiceScrapeForCRD creates or updates given object
 func VMServiceScrapeForCRD(ctx context.Context, rclient client.Client, vss *vmv1beta1.VMServiceScrape) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "reconcile.VMServiceScrapeForCRD")
+	defer span.End()
+
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		ctx, span := tracer.Start(ctx, "reconcile.VMServiceScrapeForCRD.update")
+		defer span.End()
+
 		var existVSS vmv1beta1.VMServiceScrape
 		err := rclient.Get(ctx, types.NamespacedName{Namespace: vss.Namespace, Name: vss.Name}, &existVSS)
 		if err != nil {
@@ -49,7 +57,14 @@ func VMServiceScrapeForCRD(ctx context.Context, rclient client.Client, vss *vmv1
 
 // VMPodScrapeForCRD creates or updates given object
 func VMPodScrapeForCRD(ctx context.Context, rclient client.Client, vps *vmv1beta1.VMPodScrape) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "reconcile.VMPodScrapeForCRD")
+	defer span.End()
+
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		ctx, span := tracer.Start(ctx, "reconcile.VMPodScrapeForCRD.update")
+		defer span.End()
+
 		var existVPS vmv1beta1.VMPodScrape
 		err := rclient.Get(ctx, types.NamespacedName{Namespace: vps.Namespace, Name: vps.Name}, &existVPS)
 		if err != nil {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -319,6 +320,10 @@ type objectWithStatusTrack[T client.Object, ST reconcile.StatusWithMetadata[STC]
 }
 
 func createGenericEventForObject(ctx context.Context, c client.Client, object client.Object, message string) error {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "controllers.createGenericEventForObject")
+	defer span.End()
+
 	ev := &corev1.Event{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "victoria-metrics-operator-" + uuid.New().String(),
@@ -351,6 +356,10 @@ func reconcileAndTrackStatus[T client.Object, ST reconcile.StatusWithMetadata[ST
 	object objectWithStatusTrack[T, ST, STC],
 	cb func() (ctrl.Result, error),
 ) (result ctrl.Result, resultErr error) {
+	tracer := otel.GetTracerProvider().Tracer("vmetrics")
+	ctx, span := tracer.Start(ctx, "controllers.reconcileAndTrackStatus")
+	defer span.End()
+
 	if object.Paused() {
 		if err := reconcile.UpdateObjectStatus(ctx, c, object, vmv1beta1.UpdateStatusPaused, nil); err != nil {
 			resultErr = fmt.Errorf("failed to update object status: %w", err)
