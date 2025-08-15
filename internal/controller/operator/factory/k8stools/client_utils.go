@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/watch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
@@ -88,6 +89,9 @@ func MergePatchContainers(base, patches []corev1.Container) ([]corev1.Container,
 // UpdatePodAnnotations - updates configmap-sync-time annotation
 // it triggers config rules reload for vmalert
 func UpdatePodAnnotations(ctx context.Context, rclient client.Client, selector map[string]string, ns string) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var podsToUpdate corev1.PodList
 	opts := client.ListOptions{
 		Namespace:     ns,
@@ -111,6 +115,9 @@ func UpdatePodAnnotations(ctx context.Context, rclient client.Client, selector m
 
 // ListObjectsByNamespace performs object list for given namespaces
 func ListObjectsByNamespace[T any, PT listing[T]](ctx context.Context, rclient client.Client, nss []string, collect func(PT), opts ...client.ListOption) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	dst := PT(new(T))
 	if len(nss) == 0 {
 		if err := rclient.List(ctx, dst, opts...); err != nil {
@@ -153,6 +160,9 @@ type ObjectWatcherForNamespaces struct {
 // NewObjectWatcherForNamespaces returns a watcher for events at multiple namespaces  for given object
 // in case of empty namespaces, performs cluster wide watch
 func NewObjectWatcherForNamespaces[T any, PT listing[T]](ctx context.Context, rclient client.WithWatch, crdTypeName string, namespaces []string) (watch.Interface, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	initMetrics.Do(func() {
 		metrics.Registry.MustRegister(activeWatchers, watchEventsTotalByType)
 	})
@@ -257,6 +267,9 @@ func (ow *ObjectWatcherForNamespaces) Stop() {
 
 // FetchConfigMapContentByKey returns configmap content by key
 func FetchConfigMapContentByKey(ctx context.Context, rclient client.Client, cm *corev1.ConfigMap, key string) (string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := rclient.Get(ctx, types.NamespacedName{Namespace: cm.Namespace, Name: cm.Name}, cm); err != nil {
 		return "", err
 	}

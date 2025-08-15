@@ -5,12 +5,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 )
 
 // OnVMUserDelete deletes all vmuser related resources
 func OnVMUserDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMUser) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := removeFinalizeObjByName(ctx, rclient, &corev1.Secret{}, cr.SecretName(), cr.Namespace); err != nil {
 		return err
 	}

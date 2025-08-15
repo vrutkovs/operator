@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -37,6 +38,9 @@ const (
 // needed in update checked by revision status
 // its controlled by k8s controller-manager
 func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMCluster, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1beta1.VMCluster
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -152,6 +156,8 @@ func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMCluster, rclient client
 }
 
 func createOrUpdateVMSelect(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevSts *appsv1.StatefulSet
 	if prevCR != nil && prevCR.Spec.VMSelect != nil {
@@ -212,6 +218,8 @@ func buildVMSelectService(cr *vmv1beta1.VMCluster) *corev1.Service {
 }
 
 func createOrUpdateVMSelectService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil && prevCR.Spec.VMSelect != nil {
@@ -249,6 +257,8 @@ func createOrUpdateVMSelectService(ctx context.Context, rclient client.Client, c
 
 // createOrUpdateLBProxyService builds vminsert and vmselect external services to expose vmcluster components for access by vmauth
 func createOrUpdateLBProxyService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster, svcName, port, prevPort, targetName string, svcSelectorLabels map[string]string) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	fls := cr.FinalLabels(svcSelectorLabels)
 	fls = labels.Merge(fls, map[string]string{vmauthLBServiceProxyTargetLabel: targetName})
@@ -288,6 +298,9 @@ func createOrUpdateLBProxyService(ctx context.Context, rclient client.Client, cr
 }
 
 func createOrUpdateVMInsert(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevDeploy *appsv1.Deployment
 
 	if prevCR != nil && prevCR.Spec.VMInsert != nil {
@@ -335,6 +348,8 @@ func buildVMInsertService(cr *vmv1beta1.VMCluster) *corev1.Service {
 }
 
 func createOrUpdateVMInsertService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	newService := buildVMInsertService(cr)
 	var prevService, prevAdditionalService *corev1.Service
@@ -374,6 +389,9 @@ func createOrUpdateVMInsertService(ctx context.Context, rclient client.Client, c
 }
 
 func createOrUpdateVMStorage(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevSts *appsv1.StatefulSet
 
 	if prevCR != nil && prevCR.Spec.VMStorage != nil {
@@ -397,6 +415,9 @@ func createOrUpdateVMStorage(ctx context.Context, rclient client.Client, cr, pre
 }
 
 func createOrUpdateVMStorageService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	t := &optsBuilder{
 		cr,
 		cr.GetVMStorageName(),
@@ -703,6 +724,9 @@ func makePodSpecForVMSelect(cr *vmv1beta1.VMCluster) (*corev1.PodTemplateSpec, e
 }
 
 func createOrUpdatePodDisruptionBudgetForVMSelect(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	t := newOptsBuilder(cr, cr.GetVMSelectName(), cr.VMSelectSelectorLabels())
 	pdb := build.PodDisruptionBudget(t, cr.Spec.VMSelect.PodDisruptionBudget)
 	var prevPDB *policyv1.PodDisruptionBudget
@@ -900,6 +924,9 @@ func makePodSpecForVMInsert(cr *vmv1beta1.VMCluster) (*corev1.PodTemplateSpec, e
 }
 
 func createOrUpdatePodDisruptionBudgetForVMInsert(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	t := newOptsBuilder(cr, cr.GetVMInsertName(), cr.VMInsertSelectorLabels())
 	pdb := build.PodDisruptionBudget(t, cr.Spec.VMInsert.PodDisruptionBudget)
 	var prevPDB *policyv1.PodDisruptionBudget
@@ -911,6 +938,8 @@ func createOrUpdatePodDisruptionBudgetForVMInsert(ctx context.Context, rclient c
 }
 
 func buildVMStorageSpec(ctx context.Context, cr *vmv1beta1.VMCluster) (*appsv1.StatefulSet, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	podSpec, err := makePodSpecForVMStorage(ctx, cr)
 	if err != nil {
@@ -949,6 +978,9 @@ func buildVMStorageSpec(ctx context.Context, cr *vmv1beta1.VMCluster) (*appsv1.S
 }
 
 func makePodSpecForVMStorage(ctx context.Context, cr *vmv1beta1.VMCluster) (*corev1.PodTemplateSpec, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	args := []string{
 		fmt.Sprintf("-vminsertAddr=:%s", cr.Spec.VMStorage.VMInsertPort),
 		fmt.Sprintf("-vmselectAddr=:%s", cr.Spec.VMStorage.VMSelectPort),
@@ -1144,6 +1176,9 @@ func makePodSpecForVMStorage(ctx context.Context, cr *vmv1beta1.VMCluster) (*cor
 }
 
 func createOrUpdatePodDisruptionBudgetForVMStorage(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	t := newOptsBuilder(cr, cr.GetVMStorageName(), cr.VMStorageSelectorLabels())
 	pdb := build.PodDisruptionBudget(t, cr.Spec.VMStorage.PodDisruptionBudget)
 	var prevPDB *policyv1.PodDisruptionBudget
@@ -1155,6 +1190,9 @@ func createOrUpdatePodDisruptionBudgetForVMStorage(ctx context.Context, rclient 
 }
 
 func createOrUpdateVMInsertHPA(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.VMInsert.HPA == nil {
 		return nil
 	}
@@ -1174,6 +1212,9 @@ func createOrUpdateVMInsertHPA(ctx context.Context, rclient client.Client, cr, p
 }
 
 func createOrUpdateVMSelectHPA(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.VMSelect.HPA == nil {
 		return nil
 	}
@@ -1222,6 +1263,9 @@ func (csb *optsBuilder) GetAdditionalService() *vmv1beta1.AdditionalServiceSpec 
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if prevCR == nil {
 		// fast path
 		return nil
@@ -1558,6 +1602,9 @@ func buildVMauthLBDeployment(cr *vmv1beta1.VMCluster) (*appsv1.Deployment, error
 }
 
 func createOrUpdateVMAuthLBService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	lbls := cr.VMAuthLBSelectorLabels()
 
 	// add proxy label directly to the service.labels
@@ -1594,6 +1641,8 @@ func createOrUpdateVMAuthLBService(ctx context.Context, rclient client.Client, c
 }
 
 func createOrUpdateVMAuthLB(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevSecretMeta *metav1.ObjectMeta
 	if prevCR != nil {
@@ -1628,6 +1677,8 @@ func createOrUpdateVMAuthLB(ctx context.Context, rclient client.Client, cr, prev
 }
 
 func createOrUpdatePodDisruptionBudgetForVMAuthLB(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	t := newOptsBuilder(cr, cr.GetVMAuthLBName(), cr.VMAuthLBSelectorLabels())
 	pdb := build.PodDisruptionBudget(t, cr.Spec.RequestsLoadBalancer.Spec.PodDisruptionBudget)

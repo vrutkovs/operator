@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/VictoriaMetrics/operator/internal/config"
 )
@@ -36,6 +37,9 @@ func (s *SelectorOpts) isUnmanaged() bool {
 
 // VisitSelected applies given function to any T child object matched by selectors defined in parent obj selectors
 func VisitSelected[T any, PT listing[T]](ctx context.Context, rclient client.Client, s *SelectorOpts, cb func(PT)) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if s.isUnmanaged() {
 		return nil
 	}
@@ -67,6 +71,9 @@ type discoverNamespacesResponse struct {
 
 // discoverNamespaces select namespaces by given label selector
 func discoverNamespaces(ctx context.Context, rclient client.Client, s *SelectorOpts) (*discoverNamespacesResponse, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	watchNS := getWatchNamespaces()
 
 	var namespaces []string

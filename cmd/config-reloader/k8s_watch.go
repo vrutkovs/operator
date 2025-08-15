@@ -18,6 +18,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type k8sWatcher struct {
@@ -35,6 +36,9 @@ type syncEvent struct {
 }
 
 func newKubernetesWatcher(ctx context.Context, secretName, namespace string) (*k8sWatcher, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	lr := clientcmd.NewDefaultClientConfigLoadingRules()
 
 	cfg := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(lr, &clientcmd.ConfigOverrides{})

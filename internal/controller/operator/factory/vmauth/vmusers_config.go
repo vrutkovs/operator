@@ -19,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -92,6 +93,8 @@ func (sus *skipableVMUsers) sort() {
 
 // builds vmauth config.
 func buildConfig(ctx context.Context, rclient client.Client, vmauth *vmv1beta1.VMAuth, sus *skipableVMUsers, ac *build.AssetsCache) ([]byte, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	// apply sort before making any changes to users
 	sus.sort()
@@ -134,6 +137,9 @@ func buildConfig(ctx context.Context, rclient client.Client, vmauth *vmv1beta1.V
 }
 
 func createVMUserSecrets(ctx context.Context, rclient client.Client, secrets []*corev1.Secret) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	for i := range secrets {
 		secret := secrets[i]
 		if err := rclient.Create(ctx, secret); err != nil {
@@ -170,6 +176,9 @@ type objectWithURL interface {
 }
 
 func getAsURLObject(ctx context.Context, rclient client.Client, objT objectWithURL) (string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	obj := objT.(client.Object)
 	// dirty hack to restore original type of vmcluster
 	// since cluster type erased by wrapping it into clusterWithURL
@@ -360,6 +369,9 @@ func (c *clusterWithURL) AsURL() string {
 
 // fetchCRDRefURLs performs a fetch for CRD objects for vmauth users and returns an url by crd ref key name
 func fetchCRDRefURLs(ctx context.Context, rclient client.Client, sus *skipableVMUsers) (map[string]string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	crdCacheURLCache := make(map[string]string)
 	var resultErr error
 	sus.visitAll(func(user *vmv1beta1.VMUser) bool {
@@ -872,6 +884,9 @@ func genPassword() (string, error) {
 
 // selects vmusers for given vmauth.
 func selectVMUsers(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAuth) (*skipableVMUsers, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var res []*vmv1beta1.VMUser
 	var namespacedNames []string
 	opts := &k8stools.SelectorOpts{

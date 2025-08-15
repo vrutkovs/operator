@@ -20,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -41,6 +42,8 @@ const (
 
 // CreateOrUpdate - handles VMAuth deployment reconciliation.
 func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMAuth, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevCR *vmv1beta1.VMAuth
 	if cr.ParsedLastAppliedSpec != nil {
@@ -341,6 +344,9 @@ func makeSpecForVMAuth(cr *vmv1beta1.VMAuth) (*corev1.PodTemplateSpec, error) {
 }
 
 func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAuth) *build.AssetsCache {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	cfg := map[build.ResourceKind]*build.ResourceCfg{
 		build.TLSAssetsResourceKind: {
 			MountDir:   vmAuthConfigRawFolder,
@@ -352,6 +358,9 @@ func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VM
 
 // CreateOrUpdateConfig configuration secret for vmauth.
 func CreateOrUpdateConfig(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAuth, childObject *vmv1beta1.VMUser) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// fast path
 	if cr.Spec.SecretRef != nil || cr.Spec.LocalPath != "" {
 		return nil
@@ -439,6 +448,9 @@ func buildConfigSecretMeta(cr *vmv1beta1.VMAuth) metav1.ObjectMeta {
 
 // createOrUpdateIngress handles ingress for vmauth.
 func createOrUpdateIngress(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAuth) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.Ingress == nil {
 		return nil
 	}
@@ -661,6 +673,9 @@ func setInternalSvcPort(cr *vmv1beta1.VMAuth) func(svc *corev1.Service) {
 
 // createOrUpdateService creates service for VMAuth
 func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAuth) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil {
 		prevService = build.Service(prevCR, prevCR.Spec.Port, setInternalSvcPort(prevCR))
@@ -687,6 +702,9 @@ func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevC
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAuth) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if prevCR == nil {
 		return nil
 	}

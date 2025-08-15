@@ -6,6 +6,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type orphanedCRD interface {
@@ -15,6 +16,9 @@ type orphanedCRD interface {
 
 // RemoveOrphanedDeployments removes deployments detached from given object
 func RemoveOrphanedDeployments(ctx context.Context, rclient client.Client, cr orphanedCRD, keepDeployments map[string]struct{}) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	deployToRemove, err := discoverDeploymentsByLabels(ctx, rclient, cr.GetNamespace(), cr.SelectorLabels())
 	if err != nil {
 		return err
@@ -36,6 +40,9 @@ func RemoveOrphanedDeployments(ctx context.Context, rclient client.Client, cr or
 
 // discoverDeploymentsByLabels - returns deployments with given args.
 func discoverDeploymentsByLabels(ctx context.Context, rclient client.Client, ns string, selector map[string]string) ([]*appsv1.Deployment, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var deps appsv1.DeploymentList
 	opts := client.ListOptions{
 		Namespace:     ns,
@@ -60,6 +67,9 @@ type RemoveSvcArgs struct {
 
 // RemoveOrphanedSTSs removes deployments detached from given object
 func RemoveOrphanedSTSs(ctx context.Context, rclient client.Client, cr orphanedCRD, keepSTSNames map[string]struct{}) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	deployToRemove, err := discoverSTSsByLabels(ctx, rclient, cr.GetNamespace(), cr.SelectorLabels())
 	if err != nil {
 		return err
@@ -81,6 +91,9 @@ func RemoveOrphanedSTSs(ctx context.Context, rclient client.Client, cr orphanedC
 
 // discoverDeploymentsByLabels - returns deployments with given args.
 func discoverSTSsByLabels(ctx context.Context, rclient client.Client, ns string, selector map[string]string) ([]*appsv1.StatefulSet, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var deps appsv1.StatefulSetList
 	opts := client.ListOptions{
 		Namespace:     ns,

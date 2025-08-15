@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -20,6 +21,9 @@ import (
 
 // CreateOrUpdate syncs VLCluster object to the desired state
 func CreateOrUpdate(ctx context.Context, rclient client.Client, cr *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1.VLCluster
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -62,6 +66,9 @@ func CreateOrUpdate(ctx context.Context, rclient client.Client, cr *vmv1.VLClust
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if prevCR == nil {
 		// fast path
 		return nil

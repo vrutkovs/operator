@@ -6,12 +6,16 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 )
 
 // OnVMAlertManagerDelete deletes all alertmanager related resources
 func OnVMAlertManagerDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlertmanager) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// check deployment
 	if err := removeFinalizeObjByName(ctx, rclient, &appsv1.StatefulSet{}, cr.PrefixedName(), cr.Namespace); err != nil {
 		return err

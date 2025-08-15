@@ -25,6 +25,7 @@ import (
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/pires/go-proxyproto"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var (
@@ -293,6 +294,9 @@ func (ew *emptyWatcher) startWatch(_ context.Context, _ chan struct{}) error {
 func (ew *emptyWatcher) close() {}
 
 func newConfigWatcher(ctx context.Context) (watcher, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var w watcher
 	if *configFileName == "" && *configSecretName == "" {
 		logger.Infof("direct config watch not needed, both configFileName and configSecretName is empty")

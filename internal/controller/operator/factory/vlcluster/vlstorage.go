@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -22,6 +23,9 @@ import (
 )
 
 func createOrUpdateVLStorage(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.VLStorage == nil {
 		return nil
 	}
@@ -58,6 +62,9 @@ func createOrUpdateVLStorage(ctx context.Context, rclient client.Client, cr, pre
 }
 
 func createOrUpdateVLStorageService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	t := &optsBuilder{
 		cr,
 		cr.GetVLStorageName(),
@@ -107,6 +114,9 @@ func createOrUpdateVLStorageService(ctx context.Context, rclient client.Client, 
 }
 
 func createOrUpdateVLStorageSTS(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevSts *appsv1.StatefulSet
 
 	if prevCR != nil && prevCR.Spec.VLStorage != nil {

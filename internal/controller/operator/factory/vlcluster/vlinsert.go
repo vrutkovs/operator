@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -24,6 +25,9 @@ import (
 )
 
 func createOrUpdateVLInsert(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.VLInsert == nil {
 		return nil
 	}
@@ -57,6 +61,9 @@ func createOrUpdateVLInsert(ctx context.Context, rclient client.Client, cr, prev
 }
 
 func createOrUpdatePodDisruptionBudgetForVLInsert(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.VLInsert.PodDisruptionBudget == nil {
 		return nil
 	}
@@ -71,6 +78,9 @@ func createOrUpdatePodDisruptionBudgetForVLInsert(ctx context.Context, rclient c
 }
 
 func createOrUpdateVLInsertDeployment(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevDeploy *appsv1.Deployment
 
 	if prevCR != nil && prevCR.Spec.VLInsert != nil {
@@ -258,6 +268,9 @@ func buildVLInsertPodSpec(cr *vmv1.VLCluster) (*corev1.PodTemplateSpec, error) {
 }
 
 func createOrUpdateVLInsertHPA(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.VLInsert.HPA == nil {
 		return nil
 	}
@@ -277,6 +290,9 @@ func createOrUpdateVLInsertHPA(ctx context.Context, rclient client.Client, cr, p
 }
 
 func createOrUpdateVLInsertService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	newService := buildVLInsertService(cr)
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil && prevCR.Spec.VLInsert != nil {

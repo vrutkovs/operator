@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
@@ -21,6 +22,9 @@ import (
 
 // DaemonSet performs an update or create operator for daemonset and waits until it finishes update rollout
 func DaemonSet(ctx context.Context, rclient client.Client, newDs, prevDs *appsv1.DaemonSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var isPrevEqual bool
 	var prevSpecDiff string
 	if prevDs != nil {
@@ -89,6 +93,9 @@ func DaemonSet(ctx context.Context, rclient client.Client, newDs, prevDs *appsv1
 
 // waitDeploymentReady waits until deployment's replicaSet rollouts and all new pods is ready
 func waitDaemonSetReady(ctx context.Context, rclient client.Client, ds *appsv1.DaemonSet, deadline time.Duration) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var isErrDealine bool
 	err := wait.PollUntilContextTimeout(ctx, time.Second, deadline, true, func(ctx context.Context) (done bool, err error) {
 		var daemon appsv1.DaemonSet

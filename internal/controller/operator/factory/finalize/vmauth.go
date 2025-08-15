@@ -8,12 +8,16 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 )
 
 // OnVMAuthDelete deletes all vmauth related resources
 func OnVMAuthDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAuth) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// check deployment
 	if err := removeFinalizeObjByName(ctx, rclient, &appsv1.Deployment{}, cr.PrefixedName(), cr.Namespace); err != nil {
 		return err

@@ -246,6 +246,9 @@ func handleReconcileErrWithoutStatus(
 }
 
 func isNamespaceSelectorMatches(ctx context.Context, rclient client.Client, sourceCRD, targetCRD client.Object, selector *metav1.LabelSelector) (bool, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	switch {
 	case selector == nil:
 		if sourceCRD.GetNamespace() == targetCRD.GetNamespace() {
@@ -279,6 +282,9 @@ func isNamespaceSelectorMatches(ctx context.Context, rclient client.Client, sour
 // isSelectorsMatchesTargetCRD checks if targetCRD matches sourceCRD by entity selectors and selectAll.
 // see https://docs.victoriametrics.com/operator/resources/vmagent/#scraping for details
 func isSelectorsMatchesTargetCRD(ctx context.Context, rclient client.Client, sourceCRD, targetCRD client.Object, opts *k8stools.SelectorOpts) (bool, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// selectAll only works when opts.NamespaceSelector and opts.ObjectSelector opts are undefined
 	if opts == nil || (opts.ObjectSelector == nil && opts.NamespaceSelector == nil) {
 		return opts.SelectAll, nil

@@ -97,6 +97,9 @@ func Role(ctx context.Context, rclient client.Client, newRL, prevRL *rbacv1.Role
 
 // ClusterRoleBinding reconciles cluster role binding object
 func ClusterRoleBinding(ctx context.Context, rclient client.Client, newCRB, prevCRB *rbacv1.ClusterRoleBinding) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var currentCRB rbacv1.ClusterRoleBinding
 
 	if err := rclient.Get(ctx, types.NamespacedName{Name: newCRB.Name, Namespace: newCRB.Namespace}, &currentCRB); err != nil {
@@ -135,6 +138,9 @@ func ClusterRoleBinding(ctx context.Context, rclient client.Client, newCRB, prev
 
 // ClusterRole reconciles cluster role object
 func ClusterRole(ctx context.Context, rclient client.Client, newClusterRole, prevClusterRole *rbacv1.ClusterRole) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var currentClusterRole rbacv1.ClusterRole
 
 	if err := rclient.Get(ctx, types.NamespacedName{Name: newClusterRole.Name, Namespace: newClusterRole.Namespace}, &currentClusterRole); err != nil {

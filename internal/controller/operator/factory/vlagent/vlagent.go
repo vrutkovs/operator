@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -34,6 +35,8 @@ const (
 )
 
 func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil {
@@ -72,6 +75,9 @@ func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevC
 // CreateOrUpdate creates deployment for vlagent and configures it
 // waits for healthy state
 func CreateOrUpdate(ctx context.Context, cr *vmv1.VLAgent, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1.VLAgent
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -128,6 +134,9 @@ func CreateOrUpdate(ctx context.Context, cr *vmv1.VLAgent, rclient client.Client
 }
 
 func createOrUpdateDeploy(ctx context.Context, rclient client.Client, cr *vmv1.VLAgent, newSTS, prevSTS *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	stsOpts := reconcile.STSOptions{
 		HasClaim:       len(newSTS.Spec.VolumeClaimTemplates) > 0,
 		SelectorLabels: cr.SelectorLabels,
@@ -531,6 +540,9 @@ func buildRemoteWriteArgs(cr *vmv1.VLAgent) ([]string, error) {
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if prevCR == nil {
 		return nil
 	}

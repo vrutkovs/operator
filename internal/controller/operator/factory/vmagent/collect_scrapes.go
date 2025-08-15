@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/config"
@@ -14,6 +15,9 @@ import (
 )
 
 func selectScrapeConfig(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) ([]*vmv1beta1.VMScrapeConfig, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.DaemonSetMode {
 		return nil, nil
 	}
@@ -45,6 +49,9 @@ func selectScrapeConfig(ctx context.Context, cr *vmv1beta1.VMAgent, rclient clie
 }
 
 func selectPodScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) ([]*vmv1beta1.VMPodScrape, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var selectedConfigs []*vmv1beta1.VMPodScrape
 	var namespacedNames []string
 	opts := &k8stools.SelectorOpts{
@@ -73,6 +80,9 @@ func selectPodScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client
 }
 
 func selectVMProbes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) ([]*vmv1beta1.VMProbe, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.DaemonSetMode {
 		return nil, nil
 	}
@@ -103,6 +113,9 @@ func selectVMProbes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.C
 }
 
 func selectVMNodeScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) ([]*vmv1beta1.VMNodeScrape, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.DaemonSetMode {
 		return nil, nil
 	}
@@ -141,6 +154,9 @@ func selectVMNodeScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient cli
 }
 
 func selectStaticScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) ([]*vmv1beta1.VMStaticScrape, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.DaemonSetMode {
 		return nil, nil
 	}
@@ -171,6 +187,9 @@ func selectStaticScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient cli
 }
 
 func selectServiceScrapes(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) ([]*vmv1beta1.VMServiceScrape, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.DaemonSetMode {
 		return nil, nil
 	}

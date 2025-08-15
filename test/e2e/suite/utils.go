@@ -8,6 +8,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 )
@@ -20,6 +21,9 @@ func ExpectObjectStatus(ctx context.Context,
 	object client.Object,
 	name types.NamespacedName,
 	status vmv1beta1.UpdateStatus) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := rclient.Get(ctx, name, object); err != nil {
 		return err
 	}

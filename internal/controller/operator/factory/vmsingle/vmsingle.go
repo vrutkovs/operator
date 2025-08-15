@@ -30,6 +30,9 @@ const (
 )
 
 func createStorage(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMSingle) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	newPvc := makePvc(cr)
 	var prevPVC *corev1.PersistentVolumeClaim
 	if prevCR != nil && prevCR.Spec.Storage != nil {
@@ -150,6 +153,9 @@ func newDeploy(ctx context.Context, cr *vmv1beta1.VMSingle) (*appsv1.Deployment,
 }
 
 func makeSpec(ctx context.Context, cr *vmv1beta1.VMSingle) (*corev1.PodTemplateSpec, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var args []string
 
 	if cr.Spec.RetentionPeriod != "" {
@@ -380,6 +386,9 @@ func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevC
 
 // buildStreamAggrConfig build configmap with stream aggregation config for vmsingle.
 func buildStreamAggrConfig(ctx context.Context, cr *vmv1beta1.VMSingle, rclient client.Client) (*corev1.ConfigMap, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	cfgCM := &corev1.ConfigMap{
 		ObjectMeta: build.ResourceMeta(build.StreamAggrConfigResourceKind, cr),
 		Data:       make(map[string]string),

@@ -7,6 +7,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/reconcile"
@@ -14,6 +15,9 @@ import (
 
 // createVMAuthSecretAccess creates rbac rule for watching secret changes with vmauth configuration
 func createVMAuthSecretAccess(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAuth) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := ensureVMAuthRoleExist(ctx, rclient, cr, prevCR); err != nil {
 		return fmt.Errorf("cannot check vmauth role: %w", err)
 	}
@@ -32,6 +36,9 @@ func ensureVMAuthRoleExist(ctx context.Context, rclient client.Client, cr, prevC
 }
 
 func ensureVMAuthRBExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAuth) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevRB *rbacv1.RoleBinding
 	if prevCR != nil {
 		prevRB = buildRoleBinding(prevCR)

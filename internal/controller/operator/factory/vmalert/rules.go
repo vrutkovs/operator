@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -48,6 +49,9 @@ var (
 
 // CreateOrUpdateRuleConfigMaps conditionally selects vmrules and stores content at configmaps
 func CreateOrUpdateRuleConfigMaps(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlert, childCR *vmv1beta1.VMRule) ([]string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// fast path
 	if cr.IsUnmanaged() {
 		return nil, nil
@@ -61,6 +65,9 @@ func CreateOrUpdateRuleConfigMaps(ctx context.Context, rclient client.Client, cr
 }
 
 func reconcileConfigsData(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlert, newRules map[string]string) ([]string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	newConfigMaps := makeRulesConfigMaps(cr, newRules)
 	currentCMs := make([]corev1.ConfigMap, len(newConfigMaps))
 	for idx, cm := range newConfigMaps {
@@ -168,6 +175,9 @@ func rulesCMDiff(currentCMs []corev1.ConfigMap, newCMs []corev1.ConfigMap) (toCr
 }
 
 func reconcileVMAlertConfig(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlert, childCR *vmv1beta1.VMRule) ([]string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	rulesData, vmRules, err := selectRulesContent(ctx, rclient, cr)
 	if err != nil {
 		return nil, err
@@ -197,6 +207,9 @@ func reconcileVMAlertConfig(ctx context.Context, rclient client.Client, cr *vmv1
 }
 
 func selectRulesContent(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlert) (map[string]string, []*vmv1beta1.VMRule, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var vmRules []*vmv1beta1.VMRule
 	var namespacedNames []string
 	opts := &k8stools.SelectorOpts{
@@ -340,6 +353,9 @@ func ruleConfigMapName(vmName string) string {
 // group name across single vmRule. group might include non-duplicate rules.
 // rules in group, must include uniq combination of values.
 func deduplicateRules(ctx context.Context, origin []*vmv1beta1.VMRule) []*vmv1beta1.VMRule {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// deduplicate rules across groups.
 	for _, vmRule := range origin {
 		for i, grp := range vmRule.Spec.Groups {

@@ -15,6 +15,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/config"
@@ -117,6 +118,9 @@ func (so *scrapeObjects) validateObjects(cr *vmv1beta1.VMAgent) {
 
 // CreateOrUpdateConfigurationSecret builds scrape configuration for VMAgent
 func CreateOrUpdateConfigurationSecret(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAgent, childObject client.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1beta1.VMAgent
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -130,6 +134,9 @@ func CreateOrUpdateConfigurationSecret(ctx context.Context, rclient client.Clien
 }
 
 func createOrUpdateConfigurationSecret(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent, childObject client.Object, ac *build.AssetsCache) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.IngestOnlyMode {
 		return nil
 	}
@@ -232,6 +239,9 @@ func createOrUpdateConfigurationSecret(ctx context.Context, rclient client.Clien
 }
 
 func updateStatusesForScrapeObjects(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAgent, sos *scrapeObjects, childObject client.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	parentObject := fmt.Sprintf("%s.%s.vmagent", cr.Name, cr.Namespace)
 	if childObject != nil && !reflect.ValueOf(childObject).IsNil() {
 		// fast path
@@ -420,6 +430,9 @@ func gzipConfig(buf *bytes.Buffer, conf []byte) error {
 }
 
 func setScrapeIntervalToWithLimit(ctx context.Context, dst *vmv1beta1.EndpointScrapeParams, cr *vmv1beta1.VMAgent) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if dst.ScrapeInterval == "" {
 		dst.ScrapeInterval = dst.Interval
 	}
@@ -1194,6 +1207,9 @@ func addEndpointAuthTo(cfg yaml.MapSlice, ea *vmv1beta1.EndpointAuth, namespace 
 }
 
 func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAgent) *build.AssetsCache {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	cfg := map[build.ResourceKind]*build.ResourceCfg{
 		build.SecretConfigResourceKind: {
 			MountDir:   vmAgentConfDir,

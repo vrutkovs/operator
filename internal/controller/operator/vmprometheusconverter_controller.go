@@ -73,6 +73,9 @@ type ConverterController struct {
 
 // NewConverterController builder for vmprometheusconverter service
 func NewConverterController(ctx context.Context, baseClient *kubernetes.Clientset, rclient client.WithWatch, resyncPeriod time.Duration, baseConf *config.BaseOperatorConf) (*ConverterController, error) {
+	ctx, span := logf.Trace(ctx)
+	defer span.End()
+
 	c := &ConverterController{
 		ctx:      ctx,
 		rclient:  rclient,

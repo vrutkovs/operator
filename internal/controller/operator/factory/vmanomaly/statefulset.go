@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -27,6 +28,9 @@ import (
 
 // CreateOrUpdate creates vmanomalyand and builds config for it
 func CreateOrUpdate(ctx context.Context, cr *vmv1.VMAnomaly, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1.VMAnomaly
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -181,6 +185,9 @@ func newStatefulSet(cr *vmv1.VMAnomaly, configHash string, ac *build.AssetsCache
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VMAnomaly) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if prevCR == nil {
 		return nil
 	}
@@ -207,6 +214,9 @@ const (
 var defaultPlaceholders = map[string]string{shardNumPlaceholder: "0"}
 
 func createOrUpdateShardedStatefulSet(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VMAnomaly, newStatefulSet, prevStatefulSet *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	statefulSetNames := make(map[string]struct{})
 	shardCount := cr.GetShardCount()
 	prevShardCount := prevCR.GetShardCount()
@@ -323,6 +333,9 @@ func shardNumIter(backward bool, shardCount int) iter.Seq[int] {
 }
 
 func createOrUpdateStatefulSet(ctx context.Context, rclient client.Client, cr *vmv1.VMAnomaly, newStatefulSet, prevObjectSpec *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var err error
 	statefulSetNames := make(map[string]struct{})
 	if prevObjectSpec != nil {

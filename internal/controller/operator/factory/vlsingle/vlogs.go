@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -25,6 +26,9 @@ import (
 // TODO: transit it into no-op at v0.60.0
 
 func createOrUpdateVLogsPVC(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VLogs) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	newPvc := newVLogsPVC(cr)
 	var prevPVC *corev1.PersistentVolumeClaim
 	if prevCR != nil && prevCR.Spec.Storage != nil {
@@ -56,6 +60,9 @@ func newVLogsPVC(r *vmv1beta1.VLogs) *corev1.PersistentVolumeClaim {
 
 // CreateOrUpdate performs an update for vlsingle resource
 func CreateOrUpdateVLogs(ctx context.Context, rclient client.Client, cr *vmv1beta1.VLogs) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1beta1.VLogs
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -286,6 +293,9 @@ func makeVLogsPodSpec(r *vmv1beta1.VLogs) (*corev1.PodTemplateSpec, error) {
 
 // createOrUpdateService creates service for vlsingle
 func createOrUpdateVLogsService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VLogs) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil {
 		prevService = build.Service(prevCR, prevCR.Spec.Port, nil)
@@ -313,6 +323,9 @@ func createOrUpdateVLogsService(ctx context.Context, rclient client.Client, cr, 
 }
 
 func deleteVLogsPrevStateResources(ctx context.Context, cr *vmv1beta1.VLogs, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.ParsedLastAppliedSpec == nil {
 		return nil
 	}

@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -18,6 +19,9 @@ import (
 
 // createOrUpdateConfig reconcile configuration for vmanomaly and returns configuration consistent hash
 func createOrUpdateConfig(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VMAnomaly, ac *build.AssetsCache) (string, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	data, err := config.Load(cr, ac)
 	if err != nil {
 		return "", err

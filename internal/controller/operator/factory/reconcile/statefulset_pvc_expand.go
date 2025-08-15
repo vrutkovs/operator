@@ -89,6 +89,9 @@ func getPVCFromSTS(pvcName string, sts *appsv1.StatefulSet) *corev1.PersistentVo
 }
 
 func growSTSPVC(ctx context.Context, rclient client.Client, sts *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// fast path
 	if sts.Spec.Replicas != nil && *sts.Spec.Replicas == 0 {
 		return nil
@@ -149,6 +152,9 @@ func growSTSPVC(ctx context.Context, rclient client.Client, sts *appsv1.Stateful
 
 // isStorageClassExpandable check is it possible to update size of given pvc
 func isStorageClassExpandable(ctx context.Context, rclient client.Client, pvc *corev1.PersistentVolumeClaim) (bool, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// do not perform any checks if user set annotation explicitly.
 	v, ok := pvc.Annotations[vmv1beta1.PVCExpandableLabel]
 	if ok {
@@ -216,6 +222,9 @@ func growPVCs(ctx context.Context, rclient client.Client, size *resource.Quantit
 
 // checks if pvc needs to be resized.
 func mayGrow(ctx context.Context, pvc *corev1.PersistentVolumeClaim, newSize, existSize *resource.Quantity) bool {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if newSize == nil || existSize == nil {
 		return false
 	}
@@ -300,6 +309,9 @@ func shouldRecreateSTSOnImmutableFieldChange(ctx context.Context, statefulSet, o
 }
 
 func removeStatefulSetKeepPods(ctx context.Context, rclient client.Client, statefulSet, oldStatefulSet *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// removes finalizer from exist sts, it allows to delete it
 	if err := finalize.RemoveFinalizer(ctx, rclient, oldStatefulSet); err != nil {
 		return fmt.Errorf("failed to remove finalizer from sts: %w", err)

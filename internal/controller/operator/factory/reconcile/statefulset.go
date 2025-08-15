@@ -193,6 +193,9 @@ func HandleSTSUpdate(ctx context.Context, rclient client.Client, cr STSOptions, 
 // object was processed by controller-manager
 // if ObservedGeneration matches current generation
 func getLatestStsState(ctx context.Context, rclient client.Client, targetSTS types.NamespacedName) (*appsv1.StatefulSet, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var sts appsv1.StatefulSet
 	err := wait.PollUntilContextTimeout(ctx, podWaitReadyIntervalCheck,
 		appWaitReadyDeadline, true, func(ctx context.Context) (done bool, err error) {
@@ -390,6 +393,9 @@ func PodIsReady(pod *corev1.Pod, minReadySeconds int32) bool {
 }
 
 func waitForPodReady(ctx context.Context, rclient client.Client, nsn types.NamespacedName, desiredRevision string, minReadySeconds int32) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var pod *corev1.Pod
 	if err := wait.PollUntilContextTimeout(ctx, podWaitReadyIntervalCheck, podWaitReadyTimeout, true, func(_ context.Context) (done bool, err error) {
 		pod = &corev1.Pod{}

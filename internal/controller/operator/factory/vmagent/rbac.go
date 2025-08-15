@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
@@ -115,6 +116,8 @@ var (
 
 // createVMAgentK8sAPIAccess - creates RBAC access rules for vmagent
 func createVMAgentK8sAPIAccess(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent, clusterWide bool) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	if err := migrateRBAC(ctx, rclient, cr, clusterWide); err != nil {
 		return fmt.Errorf("cannot perform RBAC migration: %w", err)
@@ -148,6 +151,9 @@ func ensureVMAgentCRExist(ctx context.Context, rclient client.Client, cr, prevCR
 }
 
 func ensureCRBExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCRB *rbacv1.ClusterRoleBinding
 	if prevCR != nil {
 		prevCRB = buildClusterRoleBinding(prevCR)
@@ -159,6 +165,9 @@ func ensureCRBExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv1
 // see https://github.com/VictoriaMetrics/operator/issues/891
 // and https://github.com/VictoriaMetrics/operator/pull/1176
 func migrateRBAC(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAgent, clusterWide bool) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	const prevNamingPrefix = "monitoring:vmagent-cluster-access-"
 	prevVersionName := prevNamingPrefix + cr.Name
 	currentVersionName := cr.GetClusterRoleName()
@@ -244,6 +253,9 @@ func ensureRoleExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv
 }
 
 func ensureVMAgentRBExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	rb := buildNamespacedRoleBinding(cr)
 	var prevRB *rbacv1.RoleBinding
 	if prevCR != nil {

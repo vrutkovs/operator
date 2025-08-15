@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
@@ -17,6 +18,9 @@ import (
 
 // ConfigMap reconciles configmap object
 func ConfigMap(ctx context.Context, rclient client.Client, newCM *corev1.ConfigMap, prevCMMEta *metav1.ObjectMeta) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var currentCM corev1.ConfigMap
 	if err := rclient.Get(ctx, types.NamespacedName{Namespace: newCM.Namespace, Name: newCM.Name}, &currentCM); err != nil {
 		if k8serrors.IsNotFound(err) {

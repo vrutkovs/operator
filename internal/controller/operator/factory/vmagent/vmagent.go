@@ -19,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/config"
@@ -53,6 +54,8 @@ const (
 var defaultPlaceholders = map[string]string{shardNumPlaceholder: "0"}
 
 func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil {
@@ -93,6 +96,9 @@ func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevC
 // CreateOrUpdate creates deployment for vmagent and configures it
 // waits for healthy state
 func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1beta1.VMAgent
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -177,6 +183,9 @@ func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.C
 }
 
 func createOrUpdateDeploy(ctx context.Context, rclient client.Client, cr, _ *vmv1beta1.VMAgent, newDeploy, prevObjectSpec runtime.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	deploymentNames := make(map[string]struct{})
 	stsNames := make(map[string]struct{})
 
@@ -254,6 +263,9 @@ func createOrUpdateDeploy(ctx context.Context, rclient client.Client, cr, _ *vmv
 }
 
 func createOrUpdateShardedDeploy(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent, newDeploy, prevDeploy runtime.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	deploymentNames := make(map[string]struct{})
 	stsNames := make(map[string]struct{})
 	shardsCount := *cr.Spec.ShardCount
@@ -841,6 +853,9 @@ func buildRelabelingsAssetsMeta(cr *vmv1beta1.VMAgent) metav1.ObjectMeta {
 
 // buildVMAgentRelabelingsAssets combines all possible relabeling config configuration and adding it to the configmap.
 func buildVMAgentRelabelingsAssets(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAgent) (*corev1.ConfigMap, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	cfgCM := &corev1.ConfigMap{
 		ObjectMeta: buildRelabelingsAssetsMeta(cr),
 		Data:       make(map[string]string),
@@ -898,6 +913,9 @@ func buildVMAgentRelabelingsAssets(ctx context.Context, rclient client.Client, c
 
 // createOrUpdateRelabelConfigsAssets builds relabeling configs for vmagent at separate configmap, serialized as yaml
 func createOrUpdateRelabelConfigsAssets(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if !cr.HasAnyRelabellingConfigs() {
 		return nil
 	}
@@ -914,6 +932,9 @@ func createOrUpdateRelabelConfigsAssets(ctx context.Context, rclient client.Clie
 
 // buildStreamAggrConfig combines all possible stream aggregation configs and adding it to the configmap.
 func buildStreamAggrConfig(ctx context.Context, cr *vmv1beta1.VMAgent, rclient client.Client) (*corev1.ConfigMap, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	cfgCM := &corev1.ConfigMap{
 		ObjectMeta: build.ResourceMeta(build.StreamAggrConfigResourceKind, cr),
 		Data:       make(map[string]string),
@@ -975,6 +996,9 @@ func buildStreamAggrConfig(ctx context.Context, cr *vmv1beta1.VMAgent, rclient c
 
 // createOrUpdateStreamAggrConfig builds stream aggregation configs for vmagent at separate configmap, serialized as yaml
 func createOrUpdateStreamAggrConfig(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// fast path
 	if !cr.HasAnyStreamAggrRule() {
 		return nil
@@ -1380,6 +1404,9 @@ func buildInitConfigContainer(useVMConfigReloader bool, cr *vmv1beta1.VMAgent, c
 }
 
 func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if prevCR == nil {
 		return nil
 	}
@@ -1429,6 +1456,9 @@ func deletePrevStateResources(ctx context.Context, rclient client.Client, cr, pr
 }
 
 func removeStaleDaemonSet(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAgent) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.Spec.DaemonSetMode {
 		return nil
 	}

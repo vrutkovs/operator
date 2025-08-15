@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
@@ -71,6 +72,9 @@ func (lw *Logger) WithName(name string) logr.LogSink {
 
 // WithContext returns logger from context or global
 func WithContext(ctx context.Context) logr.Logger {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	v, ok := ctx.Value(contextKey).(logr.Logger)
 	if ok {
 		return v.WithContext(ctx)
@@ -85,6 +89,9 @@ func AddToContext(ctx context.Context, origin logr.Logger) context.Context {
 
 // SelectedObjects formats and prints into log message selected objects for config reconcile
 func SelectedObjects(ctx context.Context, objectName string, selected, broken int, namespacedNames []string) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if len(namespacedNames) == 0 {
 		return
 	}

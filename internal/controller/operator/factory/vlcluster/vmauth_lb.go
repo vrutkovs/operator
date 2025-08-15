@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -20,6 +21,8 @@ import (
 )
 
 func createOrUpdateVMAuthLB(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevSecretMeta *metav1.ObjectMeta
 	if prevCR != nil {
@@ -212,6 +215,9 @@ func buildVMauthLBDeployment(cr *vmv1.VLCluster) (*appsv1.Deployment, error) {
 }
 
 func createOrUpdateVMAuthLBService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	lbls := cr.VMAuthLBSelectorLabels()
 
 	// add proxy label directly to the service.labels
@@ -249,6 +255,8 @@ func createOrUpdateVMAuthLBService(ctx context.Context, rclient client.Client, c
 }
 
 func createOrUpdatePodDisruptionBudgetForVMAuthLB(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	t := newOptsBuilder(cr, cr.GetVMAuthLBName(), cr.VMAuthLBSelectorLabels())
 	pdb := build.PodDisruptionBudget(t, cr.Spec.RequestsLoadBalancer.Spec.PodDisruptionBudget)
@@ -262,6 +270,8 @@ func createOrUpdatePodDisruptionBudgetForVMAuthLB(ctx context.Context, rclient c
 
 // createOrUpdateLBProxyService builds vlinsert and vlselect external services to expose vlcluster components for access by vmauth
 func createOrUpdateLBProxyService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1.VLCluster, svcName, port, prevPort, targetName string, svcSelectorLabels map[string]string) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	// TODO: check
 	fls := cr.FinalLabels(svcSelectorLabels)

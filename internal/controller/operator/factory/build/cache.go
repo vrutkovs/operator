@@ -16,6 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -117,6 +118,9 @@ type ResourceCfg struct {
 
 // NewAssetsCache returns a  new cache instance
 func NewAssetsCache(ctx context.Context, client client.Client, cfg map[ResourceKind]*ResourceCfg) *AssetsCache {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	ac := &AssetsCache{
 		cfg:        cfg,
 		ctx:        ctx,

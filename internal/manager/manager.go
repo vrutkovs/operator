@@ -133,6 +133,9 @@ func init() {
 }
 
 func RunManager(ctx context.Context) error {
+	ctx, span := logf.Trace(ctx)
+	defer span.End()
+
 	// Add flags registered by imported packages (e.g. glog and
 	// controller-runtime)
 	opts := zap.Options{

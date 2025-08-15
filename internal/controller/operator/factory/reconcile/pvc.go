@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
@@ -22,6 +23,9 @@ import (
 // in case of deletion timestamp > 0 does nothing
 // user must manually remove finalizer if needed
 func PersistentVolumeClaim(ctx context.Context, rclient client.Client, newPVC, prevPVC *corev1.PersistentVolumeClaim) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	l := logger.WithContext(ctx)
 	currentPVC := &corev1.PersistentVolumeClaim{}
 	err := rclient.Get(ctx, types.NamespacedName{Namespace: newPVC.Namespace, Name: newPVC.Name}, currentPVC)

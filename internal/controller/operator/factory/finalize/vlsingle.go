@@ -6,12 +6,16 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 )
 
 // OnVLSingleDelete deletes all vlogs related resources
 func OnVLSingleDelete(ctx context.Context, rclient client.Client, cr *vmv1.VLSingle) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// check deployment
 	if err := removeFinalizeObjByName(ctx, rclient, &appsv1.Deployment{}, cr.PrefixedName(), cr.Namespace); err != nil {
 		return err

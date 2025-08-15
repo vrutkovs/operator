@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/config"
@@ -37,6 +38,8 @@ const (
 
 // createOrUpdateService creates service for vmalert
 func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAlert) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	var prevService, prevAdditionalService *corev1.Service
 	if prevCR != nil {
@@ -66,6 +69,9 @@ func createOrUpdateService(ctx context.Context, rclient client.Client, cr, prevC
 }
 
 func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlert) *build.AssetsCache {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	cfg := map[build.ResourceKind]*build.ResourceCfg{
 		build.SecretConfigResourceKind: {
 			MountDir:   vmalertConfigSecretsDir,
@@ -81,6 +87,9 @@ func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VM
 
 // CreateOrUpdate creates vmalert deployment for given CRD
 func CreateOrUpdate(ctx context.Context, cr *vmv1beta1.VMAlert, rclient client.Client, cmNames []string) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1beta1.VMAlert
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -516,6 +525,9 @@ func buildArgs(cr *vmv1beta1.VMAlert, ruleConfigMapNames []string, ac *build.Ass
 }
 
 func createOrUpdateAssets(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAlert, ac *build.AssetsCache) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	for kind, secret := range ac.GetOutput() {
 		secret.ObjectMeta = build.ResourceMeta(kind, cr)
 		var prevSecretMeta *metav1.ObjectMeta
@@ -707,6 +719,9 @@ func buildConfigReloaderContainer(cr *vmv1beta1.VMAlert, ruleConfigMapNames []st
 }
 
 func discoverNotifierIfNeeded(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlert) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var additionalNotifiers []vmv1beta1.VMAlertNotifierSpec
 
 	if cr.Spec.Notifier != nil {
@@ -754,6 +769,9 @@ func discoverNotifierIfNeeded(ctx context.Context, rclient client.Client, cr *vm
 }
 
 func deletePrevStateResources(ctx context.Context, cr *vmv1beta1.VMAlert, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.ParsedLastAppliedSpec == nil {
 		return nil
 	}

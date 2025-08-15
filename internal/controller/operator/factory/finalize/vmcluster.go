@@ -11,12 +11,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 )
 
 // OnVMInsertDelete removes all objects related to vminsert component
 func OnVMInsertDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMCluster, obj *vmv1beta1.VMInsert) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	objMeta := metav1.ObjectMeta{
 		Namespace: cr.Namespace,
 		Name:      cr.GetVMInsertName(),
@@ -57,6 +61,9 @@ func OnVMInsertDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.
 
 // OnVMInsertDelete removes all objects related to vminsert component
 func OnVMSelectDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMCluster, obj *vmv1beta1.VMSelect) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	objMeta := metav1.ObjectMeta{
 		Namespace: cr.Namespace,
 		Name:      cr.GetVMSelectName(),
@@ -96,6 +103,9 @@ func OnVMSelectDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.
 
 // OnVMInsertDelete removes all objects related to vminsert component
 func OnVMStorageDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMCluster, obj *vmv1beta1.VMStorage) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	objMeta := metav1.ObjectMeta{
 		Namespace: cr.Namespace,
 		Name:      cr.GetVMStorageName(),
@@ -129,6 +139,9 @@ func OnVMStorageDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1
 
 // OnVMClusterDelete deletes all vmcluster related resources
 func OnVMClusterDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// check deployment
 
 	if cr.Spec.VMInsert != nil {
@@ -161,6 +174,9 @@ func OnVMClusterDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1
 
 // OnVMClusterLoadBalancerDelete removes vmauth loadbalancer components for vmcluster
 func OnVMClusterLoadBalancerDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMCluster) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	lbMeta := metav1.ObjectMeta{
 		Namespace: cr.Namespace,
 		Name:      cr.GetVMAuthLBName(),

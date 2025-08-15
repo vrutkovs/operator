@@ -57,6 +57,9 @@ func patchReplaceFinalizers(ctx context.Context, rclient client.Client, instance
 
 // AddFinalizer adds finalizer to instance if needed.
 func AddFinalizer(ctx context.Context, rclient client.Client, instance client.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	return vmv1beta1.AddFinalizerAndThen(instance, func(o client.Object) error {
 		return patchReplaceFinalizers(ctx, rclient, o)
 	})
@@ -107,6 +110,9 @@ func SafeDelete(ctx context.Context, rclient client.Client, r client.Object) err
 
 // SafeDeleteForSelectorsWithFinalizer removes given object if it matches provided label selectors
 func SafeDeleteForSelectorsWithFinalizer(ctx context.Context, rclient client.Client, r client.Object, selectors map[string]string) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	objName, objNs := r.GetName(), r.GetNamespace()
 	if objName == "" || objNs == "" {
 		return fmt.Errorf("BUG: object name=%q or object namespace=%q cannot be empty", objName, objNs)
@@ -204,10 +210,16 @@ func deleteSA(ctx context.Context, rclient client.Client, cr crObject) error {
 }
 
 func finalizePDB(ctx context.Context, rclient client.Client, cr crObject) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	return removeFinalizeObjByName(ctx, rclient, &policyv1.PodDisruptionBudget{}, cr.PrefixedName(), cr.GetNamespace())
 }
 
 func removeConfigReloaderRole(ctx context.Context, rclient client.Client, cr crObject) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := removeFinalizeObjByName(ctx, rclient, &rbacv1.RoleBinding{}, cr.PrefixedName(), cr.GetNamespace()); err != nil {
 		return err
 	}
