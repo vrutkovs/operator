@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
@@ -17,6 +18,9 @@ import (
 
 // PDB creates or updates PodDisruptionBudget
 func PDB(ctx context.Context, rclient client.Client, newPDB, prevPDB *policyv1.PodDisruptionBudget) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		currentPdb := &policyv1.PodDisruptionBudget{}
 		err := rclient.Get(ctx, types.NamespacedName{Namespace: newPDB.Namespace, Name: newPDB.Name}, currentPdb)

@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/config"
@@ -38,6 +39,9 @@ import (
 // Other solution, to check orphaned objects by selector.
 // Lets leave it as this for now and handle later.
 func recreateSTSIfNeed(ctx context.Context, rclient client.Client, newSTS, oldStatefulSet *appsv1.StatefulSet) (bool, bool, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	l := logger.WithContext(ctx)
 	handleRemove := func() error {
 		return removeStatefulSetKeepPods(ctx, rclient, newSTS, oldStatefulSet)
@@ -231,6 +235,9 @@ func mayGrow(ctx context.Context, pvc *corev1.PersistentVolumeClaim, newSize, ex
 }
 
 func shouldRecreateSTSOnStorageChange(ctx context.Context, actualPVC, newPVC *corev1.PersistentVolumeClaim) bool {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// fast path
 	if actualPVC == nil && newPVC == nil {
 		return false
@@ -268,6 +275,9 @@ func shouldRecreateSTSOnStorageChange(ctx context.Context, actualPVC, newPVC *co
 // logic was borrowed from
 // https://github.com/kubernetes/kubernetes/blob/a866cbe2e5bbaa01cfd5e969aa3e033f3282a8a2/pkg/apis/apps/validation/validation.go#L166
 func shouldRecreateSTSOnImmutableFieldChange(ctx context.Context, statefulSet, oldStatefulSet *appsv1.StatefulSet) bool {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// statefulset updates aren't super common and general updates are likely to be touching spec, so we'll do this
 	// deep copy right away.  This avoids mutating our inputs
 	newStatefulSetClone := statefulSet.DeepCopy()

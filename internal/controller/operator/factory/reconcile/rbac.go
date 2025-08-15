@@ -9,6 +9,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
@@ -18,6 +19,10 @@ import (
 // RoleBinding reconciles rolebindg object
 func RoleBinding(ctx context.Context, rclient client.Client, newRB, prevRB *rbacv1.RoleBinding) error {
 	var currentRB rbacv1.RoleBinding
+
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := rclient.Get(ctx, types.NamespacedName{Namespace: newRB.Namespace, Name: newRB.Name}, &currentRB); err != nil {
 		if k8serrors.IsNotFound(err) {
 			logger.WithContext(ctx).Info(fmt.Sprintf("creating new RoleBinding %s", newRB.Name))
@@ -55,6 +60,10 @@ func RoleBinding(ctx context.Context, rclient client.Client, newRB, prevRB *rbac
 // Role reconciles role object
 func Role(ctx context.Context, rclient client.Client, newRL, prevRL *rbacv1.Role) error {
 	var currentRL rbacv1.Role
+
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := rclient.Get(ctx, types.NamespacedName{Namespace: newRL.Namespace, Name: newRL.Name}, &currentRL); err != nil {
 		if k8serrors.IsNotFound(err) {
 			logger.WithContext(ctx).Info(fmt.Sprintf("creating new Role %s", newRL.Name))

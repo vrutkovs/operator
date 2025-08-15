@@ -11,6 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -35,6 +36,9 @@ func init() {
 
 // CreateOrUpdateAlertManager creates alertmanager and builds config for it
 func CreateOrUpdateAlertManager(ctx context.Context, cr *vmv1beta1.VMAlertmanager, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevCR *vmv1beta1.VMAlertmanager
 	if cr.ParsedLastAppliedSpec != nil {
 		prevCR = cr.DeepCopy()
@@ -99,6 +103,9 @@ func CreateOrUpdateAlertManager(ctx context.Context, cr *vmv1beta1.VMAlertmanage
 }
 
 func deletePrevStateResources(ctx context.Context, cr *vmv1beta1.VMAlertmanager, rclient client.Client) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if cr.ParsedLastAppliedSpec == nil {
 		return nil
 	}

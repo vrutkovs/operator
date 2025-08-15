@@ -157,6 +157,9 @@ func getDeploymentCondition(status appsv1.DeploymentStatus, condType appsv1.Depl
 }
 
 func reportFirstNotReadyPodOnError(ctx context.Context, rclient client.Client, origin error, ns string, selector labels.Selector, minReadySeconds int32) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	// list pods and join statuses
 	var podList corev1.PodList
 	if err := rclient.List(ctx, &podList, &client.ListOptions{

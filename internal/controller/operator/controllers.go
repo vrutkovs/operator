@@ -372,6 +372,7 @@ func reconcileAndTrackStatus[T client.Object, ST reconcile.StatusWithMetadata[ST
 	}
 	var diffPatch client.Patch
 	if specChanged {
+		span.AddEvent("spec changed")
 		diffPatch, err = object.LastAppliedSpecAsPatch()
 		if err != nil {
 			resultErr = fmt.Errorf("cannot parse last applied spec for cluster: %w", err)
@@ -404,6 +405,7 @@ func reconcileAndTrackStatus[T client.Object, ST reconcile.StatusWithMetadata[ST
 		}
 		desiredStatus := vmv1beta1.UpdateStatusFailed
 		if reconcile.IsErrorWaitTimeout(err) {
+			span.RecordError(err)
 			desiredStatus = vmv1beta1.UpdateStatusExpanding
 		}
 		if updateErr := reconcile.UpdateObjectStatus(ctx, c, object, desiredStatus, err); updateErr != nil {

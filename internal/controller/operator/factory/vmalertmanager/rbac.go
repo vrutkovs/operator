@@ -7,6 +7,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/reconcile"
@@ -14,6 +15,9 @@ import (
 
 // createConfigSecretAccess creates k8s api access for vmalertmanager config-reloader container
 func createConfigSecretAccess(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAlertmanager) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := ensureVMAlertmanagerRoleExist(ctx, rclient, cr, prevCR); err != nil {
 		return fmt.Errorf("cannot check vmauth role: %w", err)
 	}
@@ -24,6 +28,9 @@ func createConfigSecretAccess(ctx context.Context, rclient client.Client, cr, pr
 }
 
 func ensureVMAlertmanagerRoleExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAlertmanager) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevRole *rbacv1.Role
 	if prevCR != nil {
 		prevRole = buildRole(prevCR)
@@ -32,6 +39,9 @@ func ensureVMAlertmanagerRoleExist(ctx context.Context, rclient client.Client, c
 }
 
 func ensureVMAlertmanagerRBExist(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAlertmanager) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var prevRB *rbacv1.RoleBinding
 	if prevCR != nil {
 		prevRB = buildRoleBinding(prevCR)

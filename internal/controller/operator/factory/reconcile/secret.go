@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
@@ -18,6 +19,9 @@ import (
 // Secret reconciles secret object
 func Secret(ctx context.Context, rclient client.Client, newS *corev1.Secret, prevMeta *metav1.ObjectMeta) error {
 	var currentS corev1.Secret
+
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	if err := rclient.Get(ctx, types.NamespacedName{Namespace: newS.Namespace, Name: newS.Name}, &currentS); err != nil {
 		if k8serrors.IsNotFound(err) {

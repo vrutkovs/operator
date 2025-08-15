@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
@@ -80,6 +81,9 @@ func newStsForAlertManager(cr *vmv1beta1.VMAlertmanager) (*appsv1.StatefulSet, e
 }
 
 func createOrUpdateAlertManagerService(ctx context.Context, rclient client.Client, cr, prevCR *vmv1beta1.VMAlertmanager) (*corev1.Service, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	port, err := strconv.ParseInt(cr.Port(), 10, 32)
 	if err != nil {
 		return nil, fmt.Errorf("cannot reconcile additional service for vmalertmanager: failed to parse port: %w", err)
@@ -451,6 +455,8 @@ func makeStatefulSetSpec(cr *vmv1beta1.VMAlertmanager) (*appsv1.StatefulSetSpec,
 }
 
 func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlertmanager) *build.AssetsCache {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 	cfg := map[build.ResourceKind]*build.ResourceCfg{
 		build.TLSAssetsResourceKind: {
 			MountDir:   tlsAssetsDir,
@@ -463,6 +469,9 @@ func getAssetsCache(ctx context.Context, rclient client.Client, cr *vmv1beta1.VM
 // CreateOrUpdateConfig - check if secret with config exist,
 // if not create with predefined or user value.
 func CreateOrUpdateConfig(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlertmanager, childCR *vmv1beta1.VMAlertmanagerConfig) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	l := logger.WithContext(ctx)
 	var prevCR *vmv1beta1.VMAlertmanager
 	if cr.ParsedLastAppliedSpec != nil {
@@ -687,6 +696,9 @@ func buildVMAlertmanagerConfigReloader(cr *vmv1beta1.VMAlertmanager, crVolumeMou
 }
 
 func getSecretContentForAlertmanager(ctx context.Context, rclient client.Client, secretName, ns string) ([]byte, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var s corev1.Secret
 	if err := rclient.Get(ctx, types.NamespacedName{Namespace: ns, Name: secretName}, &s); err != nil {
 		// return nil for backward compatibility
@@ -703,6 +715,9 @@ func getSecretContentForAlertmanager(ctx context.Context, rclient client.Client,
 }
 
 func buildAlertmanagerConfigWithCRDs(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMAlertmanager, originConfig []byte, ac *build.AssetsCache) (*parsedConfig, error) {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var amCfgs []*vmv1beta1.VMAlertmanagerConfig
 	var badCfgs []*vmv1beta1.VMAlertmanagerConfig
 	var namespacedNames []string

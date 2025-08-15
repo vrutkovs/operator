@@ -20,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
@@ -39,6 +40,9 @@ type STSOptions struct {
 }
 
 func waitForStatefulSetReady(ctx context.Context, rclient client.Client, newSts *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	err := wait.PollUntilContextTimeout(ctx, podWaitReadyIntervalCheck, appWaitReadyDeadline, true, func(ctx context.Context) (done bool, err error) {
 		// fast path
 		if newSts.Spec.Replicas == nil {
@@ -64,6 +68,9 @@ func waitForStatefulSetReady(ctx context.Context, rclient client.Client, newSts 
 
 // HandleSTSUpdate performs create and update operations for given statefulSet with STSOptions
 func HandleSTSUpdate(ctx context.Context, rclient client.Client, cr STSOptions, newSts, prevSts *appsv1.StatefulSet) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	if err := validateStatefulSet(newSts); err != nil {
 		return err
 	}
@@ -212,6 +219,9 @@ func getLatestStsState(ctx context.Context, rclient client.Client, targetSTS typ
 // we always check if sts.Status.CurrentRevision needs update, to keep it equal to UpdateRevision
 // see https://github.com/kubernetes/kube-state-metrics/issues/1324#issuecomment-1779751992
 func performRollingUpdateOnSts(ctx context.Context, podMustRecreate bool, rclient client.Client, stsName string, ns string, podLabels map[string]string, podMaxUnavailable int) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	time.Sleep(podWaitReadyIntervalCheck)
 	sts, err := getLatestStsState(ctx, rclient, types.NamespacedName{Name: stsName, Namespace: ns})
 	if err != nil {

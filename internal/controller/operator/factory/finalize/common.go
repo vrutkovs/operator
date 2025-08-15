@@ -64,6 +64,9 @@ func AddFinalizer(ctx context.Context, rclient client.Client, instance client.Ob
 
 // RemoveFinalizer removes finalizer from instance if needed.
 func RemoveFinalizer(ctx context.Context, rclient client.Client, instance client.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	return vmv1beta1.RemoveFinalizer(instance, func(o client.Object) error {
 		return patchReplaceFinalizers(ctx, rclient, o)
 	})
@@ -156,6 +159,9 @@ func isLabelsMatchSelectors(objLabels map[string]string, selectorLabels map[stri
 
 // SafeDeleteWithFinalizer removes object, ignores notfound error.
 func SafeDeleteWithFinalizer(ctx context.Context, rclient client.Client, r client.Object) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	objName, objNs := r.GetName(), r.GetNamespace()
 	if objName == "" || objNs == "" {
 		return fmt.Errorf("BUG: object name=%q or object namespace=%q cannot be empty", objName, objNs)

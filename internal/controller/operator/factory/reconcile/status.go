@@ -50,6 +50,9 @@ func StatusForChildObjects[T any, PT interface {
 }](ctx context.Context, rclient client.Client, parentObjectName string, childObjects []PT) error {
 	var errors []string
 
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	n := strings.Split(parentObjectName, ".")
 	if len(n) != 3 {
 		panic(fmt.Sprintf("BUG: unexpected format for parentObjectName=%q, want name.namespace.resource", parentObjectName))

@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
@@ -23,6 +24,9 @@ import (
 // in case of spec.type= LoadBalancer or NodePort, clusterIP: None is not allowed,
 // its users responsibility to define it correctly.
 func Service(ctx context.Context, rclient client.Client, newService, prevService *corev1.Service) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	svcForReconcile := newService.DeepCopy()
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		return reconcileService(ctx, rclient, svcForReconcile, prevService)
@@ -30,6 +34,9 @@ func Service(ctx context.Context, rclient client.Client, newService, prevService
 }
 
 func reconcileService(ctx context.Context, rclient client.Client, newService, prevService *corev1.Service) error {
+	ctx, span := log.Trace(ctx)
+	defer span.End()
+
 	var isPrevServiceEqual bool
 	var prevSpecDiff string
 	if prevService != nil {
@@ -148,6 +155,9 @@ func reconcileService(ctx context.Context, rclient client.Client, newService, pr
 func AdditionalServices(ctx context.Context, rclient client.Client,
 	defaultName, namespace string,
 	prevSvc, currSvc *vmv1beta1.AdditionalServiceSpec) error {
+
+	ctx, span := log.Trace(ctx)
+	defer span.End()
 
 	if currSvc == nil &&
 		prevSvc != nil &&
