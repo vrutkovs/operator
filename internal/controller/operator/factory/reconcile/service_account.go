@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"go.opentelemetry.io/otel"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -15,12 +14,12 @@ import (
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // ServiceAccount creates service account or updates exist one
 func ServiceAccount(ctx context.Context, rclient client.Client, newSA, prevSA *corev1.ServiceAccount) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "reconcile.ServiceAccount")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {

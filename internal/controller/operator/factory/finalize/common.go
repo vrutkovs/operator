@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"go.opentelemetry.io/otel"
 	corev1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -15,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type crObject interface {
@@ -27,8 +27,7 @@ type crObject interface {
 }
 
 func patchReplaceFinalizers(ctx context.Context, rclient client.Client, instance client.Object) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.patchReplaceFinalizers")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	op := []map[string]any{
@@ -71,15 +70,13 @@ func RemoveFinalizer(ctx context.Context, rclient client.Client, instance client
 }
 
 func removeFinalizeObjByName(ctx context.Context, rclient client.Client, obj client.Object, name, ns string) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.removeFinalizeObjByName")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 	return removeFinalizeObjByNameWithOwnerReference(ctx, rclient, obj, name, ns, true)
 }
 
 func removeFinalizeObjByNameWithOwnerReference(ctx context.Context, rclient client.Client, obj client.Object, name, ns string, keepOwnerReference bool) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.removeFinalizeObjByName")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 	if err := rclient.Get(ctx, types.NamespacedName{Name: name, Namespace: ns}, obj); err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -94,8 +91,7 @@ func removeFinalizeObjByNameWithOwnerReference(ctx context.Context, rclient clie
 
 // SafeDelete removes object, ignores notfound error.
 func SafeDelete(ctx context.Context, rclient client.Client, r client.Object) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.SafeDelete")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	if err := rclient.Delete(ctx, r); err != nil {
@@ -189,8 +185,7 @@ func SafeDeleteWithFinalizer(ctx context.Context, rclient client.Client, r clien
 }
 
 func deleteSA(ctx context.Context, rclient client.Client, cr crObject) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.deleteSA")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	if !cr.IsOwnsServiceAccount() {
@@ -225,8 +220,7 @@ func removeConfigReloaderRole(ctx context.Context, rclient client.Client, cr crO
 
 // FreeIfNeeded checks if resource must be freed from finalizer and garbage collected by kubernetes
 func FreeIfNeeded(ctx context.Context, rclient client.Client, object client.Object) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.FreeIfNeeded")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	if object.GetDeletionTimestamp().IsZero() {

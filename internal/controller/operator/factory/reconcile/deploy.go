@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -15,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
@@ -23,8 +23,7 @@ import (
 
 // Deployment performs an update or create operator for deployment and waits until it's replicas is ready
 func Deployment(ctx context.Context, rclient client.Client, newDeploy, prevDeploy *appsv1.Deployment, hasHPA bool) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "reconcile.Deployment")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	var isPrevEqual bool
@@ -38,7 +37,7 @@ func Deployment(ctx context.Context, rclient client.Client, newDeploy, prevDeplo
 	rclient.Scheme().Default(newDeploy)
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		ctx, span := tracer.Start(ctx, "reconcile.Deployment.func")
+		ctx, span := log.Trace(ctx)
 		defer span.End()
 
 		var currentDeploy appsv1.Deployment
@@ -101,8 +100,7 @@ func Deployment(ctx context.Context, rclient client.Client, newDeploy, prevDeplo
 
 // waitDeploymentReady waits until deployment's replicaSet rollouts and all new pods is ready
 func waitDeploymentReady(ctx context.Context, rclient client.Client, dep *appsv1.Deployment, deadline time.Duration) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "reconcile.waitDeploymentReady")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	var isErrDealine bool

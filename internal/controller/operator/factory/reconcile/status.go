@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/otel"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,6 +18,7 @@ import (
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var (
@@ -195,8 +195,7 @@ type StatusWithMetadata[T any] interface {
 
 // UpdateStatus reconcile provided object status with given actualStatus status
 func UpdateObjectStatus[T client.Object, ST StatusWithMetadata[STC], STC any](ctx context.Context, rclient client.Client, object ObjectWithDeepCopyAndStatus[T, ST, STC], actualStatus vmv1beta1.UpdateStatus, maybeErr error) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "reconcile.UpdateObjectStatus")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	currentStatus := object.GetStatus()

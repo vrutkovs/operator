@@ -3,19 +3,18 @@ package finalize
 import (
 	"context"
 
-	"go.opentelemetry.io/otel"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/build"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // OnVMSingleDelete deletes all vmsingle related resources
 func OnVMSingleDelete(ctx context.Context, rclient client.Client, cr *vmv1beta1.VMSingle) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "finalize.OnVMSingleDelete")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	// check deployment

@@ -20,7 +20,6 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	appsv1 "k8s.io/api/apps/v1"
@@ -28,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	vmv1 "github.com/VictoriaMetrics/operator/api/operator/v1"
 	"github.com/VictoriaMetrics/operator/internal/config"
@@ -63,8 +63,7 @@ func (r *VMAnomalyReconciler) Init(rclient client.Client, l logr.Logger, sc *run
 // +kubebuilder:rbac:groups="",resources=pods,verbs=*
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;watch;list
 func (r *VMAnomalyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	tracer := otel.GetTracerProvider().Tracer("vmanomaly")
-	ctx, span := tracer.Start(ctx, "VMAnomalyReconciler", trace.WithAttributes(
+	ctx, span := log.Trace(ctx, trace.WithAttributes(
 		attribute.String("request", req.String()),
 	))
 	defer span.End()

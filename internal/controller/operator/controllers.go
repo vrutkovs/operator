@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
-	"go.opentelemetry.io/otel"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +20,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	k8sreconcile "sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -320,8 +320,7 @@ type objectWithStatusTrack[T client.Object, ST reconcile.StatusWithMetadata[STC]
 }
 
 func createGenericEventForObject(ctx context.Context, c client.Client, object client.Object, message string) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "controllers.createGenericEventForObject")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	ev := &corev1.Event{
@@ -356,8 +355,7 @@ func reconcileAndTrackStatus[T client.Object, ST reconcile.StatusWithMetadata[ST
 	object objectWithStatusTrack[T, ST, STC],
 	cb func() (ctrl.Result, error),
 ) (result ctrl.Result, resultErr error) {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "controllers.reconcileAndTrackStatus")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	if object.Paused() {

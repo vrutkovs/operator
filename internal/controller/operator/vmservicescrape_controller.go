@@ -21,12 +21,12 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
@@ -61,8 +61,7 @@ func (r *VMServiceScrapeReconciler) Scheme() *runtime.Scheme {
 func (r *VMServiceScrapeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	instance := &vmv1beta1.VMServiceScrape{}
 
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "VMServiceScrapeReconciler", trace.WithAttributes(
+	ctx, span := log.Trace(ctx, trace.WithAttributes(
 		attribute.String("request", req.String()),
 	))
 	defer span.End()

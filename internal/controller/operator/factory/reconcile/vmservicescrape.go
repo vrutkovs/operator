@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"go.opentelemetry.io/otel"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -14,16 +13,16 @@ import (
 	vmv1beta1 "github.com/VictoriaMetrics/operator/api/operator/v1beta1"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/finalize"
 	"github.com/VictoriaMetrics/operator/internal/controller/operator/factory/logger"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // VMServiceScrapeForCRD creates or updates given object
 func VMServiceScrapeForCRD(ctx context.Context, rclient client.Client, vss *vmv1beta1.VMServiceScrape) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "reconcile.VMServiceScrapeForCRD")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		ctx, span := tracer.Start(ctx, "reconcile.VMServiceScrapeForCRD.update")
+		ctx, span := log.Trace(ctx)
 		defer span.End()
 
 		var existVSS vmv1beta1.VMServiceScrape
@@ -57,12 +56,11 @@ func VMServiceScrapeForCRD(ctx context.Context, rclient client.Client, vss *vmv1
 
 // VMPodScrapeForCRD creates or updates given object
 func VMPodScrapeForCRD(ctx context.Context, rclient client.Client, vps *vmv1beta1.VMPodScrape) error {
-	tracer := otel.GetTracerProvider().Tracer("vmetrics")
-	ctx, span := tracer.Start(ctx, "reconcile.VMPodScrapeForCRD")
+	ctx, span := log.Trace(ctx)
 	defer span.End()
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		ctx, span := tracer.Start(ctx, "reconcile.VMPodScrapeForCRD.update")
+		ctx, span := log.Trace(ctx)
 		defer span.End()
 
 		var existVPS vmv1beta1.VMPodScrape
