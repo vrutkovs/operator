@@ -106,7 +106,7 @@ func waitDeploymentReady(ctx context.Context, rclient client.Client, dep *appsv1
 	defer span.End()
 
 	var isErrDealine bool
-	err := wait.PollUntilContextTimeout(ctx, time.Second, deadline, false, func(ctx context.Context) (done bool, err error) {
+	err := wait.PollUntilContextTimeout(ctx, time.Second, deadline, true, func(ctx context.Context) (done bool, err error) {
 		var actualDeploy appsv1.Deployment
 		if err := rclient.Get(ctx, types.NamespacedName{Namespace: dep.Namespace, Name: dep.Name}, &actualDeploy); err != nil {
 			return false, fmt.Errorf("cannot fetch actual deployment state: %w", err)
