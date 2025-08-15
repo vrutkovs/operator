@@ -89,7 +89,7 @@ func (r *VLClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	r.Client.Scheme().Default(instance)
 
-	result, err = reconcileAndTrackStatus(ctx, r.Client, instance.DeepCopy(), func() (ctrl.Result, error) {
+	result, err = reconcileAndTrackStatus(ctx, r.Client, instance.DeepCopy(), func(ctx context.Context) (ctrl.Result, error) {
 		if err = vlcluster.CreateOrUpdate(ctx, r, instance); err != nil {
 			return result, fmt.Errorf("failed create or update vlsingle: %w", err)
 		}

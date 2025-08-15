@@ -99,7 +99,7 @@ func (r *VMSingleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 	}
 	r.Client.Scheme().Default(instance)
 
-	result, err = reconcileAndTrackStatus(ctx, r.Client, instance.DeepCopy(), func() (ctrl.Result, error) {
+	result, err = reconcileAndTrackStatus(ctx, r.Client, instance.DeepCopy(), func(ctx context.Context) (ctrl.Result, error) {
 		if err = vmsingle.CreateOrUpdate(ctx, instance, r); err != nil {
 			return result, fmt.Errorf("failed create or update single: %w", err)
 		}

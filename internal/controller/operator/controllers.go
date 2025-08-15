@@ -353,7 +353,7 @@ func reconcileAndTrackStatus[T client.Object, ST reconcile.StatusWithMetadata[ST
 	ctx context.Context,
 	c client.Client,
 	object objectWithStatusTrack[T, ST, STC],
-	cb func() (ctrl.Result, error),
+	cb func(ctx context.Context) (ctrl.Result, error),
 ) (result ctrl.Result, resultErr error) {
 	ctx, span := log.Trace(ctx)
 	defer span.End()
@@ -395,7 +395,7 @@ func reconcileAndTrackStatus[T client.Object, ST reconcile.StatusWithMetadata[ST
 		logger.WithContext(ctx).Info("object has changes with previous state, applying changes")
 	}
 
-	result, err = cb()
+	result, err = cb(ctx)
 	if err != nil {
 		// do not change status on conflict to failed
 		// it should be retried on the next loop
