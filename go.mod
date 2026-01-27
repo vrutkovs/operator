@@ -126,4 +126,4 @@ require (
 
 replace github.com/VictoriaMetrics/operator/api => ./api
 // TODO: remove this line once https://github.com/kubernetes-sigs/controller-runtime/issues/3418 is merged
-replace sigs.k8s.io/structured-merge-diff/v6 => github.com/TwoStone/structured-merge-diff/v6 v6.3.1-fix
+replace sigs.k8s.io/structured-merge-diff/v6 => github.com/TwoStone/structured-merge-diff/v6 v6.3.1

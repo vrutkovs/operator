@@ -2,6 +2,8 @@ github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/TwoStone/structured-merge-diff/v6 v6.3.1-fix h1:Pwq8wRLsRlxyTmKjNgNW3237tJy7Q/wUD1O/DXaEBA0=
 github.com/TwoStone/structured-merge-diff/v6 v6.3.1-fix/go.mod h1:M3W8sfWvn2HhQDIbGWj3S099YozAsymCo/wrT5ohRUE=
+github.com/TwoStone/structured-merge-diff/v6 v6.3.1 h1:Guc0wGfHWhV646nkXf95D9SuhsqHE3IJeWoKhrkO9MI=
+github.com/TwoStone/structured-merge-diff/v6 v6.3.1/go.mod h1:M3W8sfWvn2HhQDIbGWj3S099YozAsymCo/wrT5ohRUE=
 github.com/VictoriaMetrics/VictoriaLogs v1.36.2-0.20251008164716-21c0fb3de84d h1:fV15mhBCGpCCBbuOAbOflO8Air+tLklMt8bG35FimzQ=
 github.com/VictoriaMetrics/VictoriaLogs v1.36.2-0.20251008164716-21c0fb3de84d/go.mod h1:JKZK8LZ9O38pW3+CbBSqL64nswBg6nJ0GE788b0Ps/8=
 github.com/VictoriaMetrics/VictoriaMetrics v1.132.0 h1:7J6U3j4WvjyEez+Ibb2bAYBbM+znWWoSCRclrrkPrhg=
