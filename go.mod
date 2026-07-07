@@ -35,7 +35,7 @@ require (
 )
 
 require (
-	github.com/VictoriaMetrics/VictoriaLogs v1.36.2-0.20251008164716-21c0fb3de84d // indirect
+	github.com/VictoriaMetrics/VictoriaLogs v0.0.0-20260125191521-bc89d84cd61d // indirect
 	github.com/VictoriaMetrics/easyproto v1.1.3 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.1 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.7 // indirect
@@ -125,3 +125,5 @@ require (
 )
 
 replace github.com/VictoriaMetrics/operator/api => ./api
+
+replace github.com/VictoriaMetrics/VictoriaLogs v1.36.2-0.20251008164716-21c0fb3de84d => github.com/VictoriaMetrics/VictoriaLogs v0.0.0-20260125191521-bc89d84cd61d

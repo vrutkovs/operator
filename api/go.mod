@@ -21,9 +21,11 @@ require (
 	sigs.k8s.io/gateway-api v1.3.0
 )
 
+replace github.com/VictoriaMetrics/VictoriaLogs v1.36.2-0.20251008164716-21c0fb3de84d => github.com/VictoriaMetrics/VictoriaLogs v0.0.0-20260125191521-bc89d84cd61d
+
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/VictoriaMetrics/VictoriaLogs v1.36.2-0.20251008164716-21c0fb3de84d // indirect
+	github.com/VictoriaMetrics/VictoriaLogs v0.0.0-20260125191521-bc89d84cd61d // indirect
 	github.com/VictoriaMetrics/easyproto v1.1.3 // indirect
 	github.com/VictoriaMetrics/metrics v1.40.2 // indirect
 	github.com/VictoriaMetrics/metricsql v0.84.10 // indirect
